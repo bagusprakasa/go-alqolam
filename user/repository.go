@@ -21,7 +21,7 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) Index() ([]User, error) {
 	var user []User
 
-	err := r.db.Find(&user).Error
+	err := r.db.Where("deleted_at = ?", "0000-00-00 00:00:00.000").Find(&user).Error
 	if err != nil {
 		return user, err
 	}

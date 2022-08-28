@@ -18,6 +18,18 @@ func NewUserHandler(userService user.Service, authService auth.Service) *userHan
 	return &userHandler{userService, authService}
 }
 
+func (h *userHandler) Index(c *gin.Context) {
+	users, err := h.userService.Index()
+	if err != nil {
+		response := helper.APIResponse("Error to get users", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("List of users", http.StatusOK, "success", user.FormatUsers(users))
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *userHandler) RegisterUser(c *gin.Context) {
 	var input user.RegisterUserInput
 
@@ -39,14 +51,13 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(newUser.ID)
 	if err != nil {
 		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	formatter := user.FormatUser(newUser, token)
+	formatter := user.FormatUserNonToken(newUser)
 
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
 
@@ -87,3 +98,77 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 	response := helper.APIResponse(metaMessage, http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) Login(c *gin.Context) {
+	var input user.LoginInput
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	loggedinUser, err := h.userService.Login(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	token, err := h.authService.GenerateToken(loggedinUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Login failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	formatter := user.FormatUser(loggedinUser, token)
+
+	response := helper.APIResponse("Successfuly loggedin", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
+}
+
+// func (h *userHandler) Update(c *gin.Context) {
+// 	var inputID user.Show
+
+// 	err := c.ShouldBindUri(&inputID)
+// 	if err != nil {
+// 		response := helper.APIResponse("Failed to update user", http.StatusBadRequest, "error", nil)
+// 		c.JSON(http.StatusBadRequest, response)
+// 		return
+// 	}
+
+// 	var inputData user.RegisterUserInput
+
+// 	err = c.ShouldBindJSON(&inputData)
+// 	if err != nil {
+// 		errors := helper.FormatValidationError(err)
+// 		errorMessage := gin.H{"errors": errors}
+
+// 		response := helper.APIResponse("Failed to update user", http.StatusUnprocessableEntity, "error", errorMessage)
+// 		c.JSON(http.StatusUnprocessableEntity, response)
+// 		return
+// 	}
+
+// 	currentUser := c.MustGet("currentUser").(user.User)
+// 	inputData.User = currentUser
+
+// 	updatedUser, err := h.service.Update(inputID, inputData)
+// 	if err != nil {
+// 		response := helper.APIResponse("Failed to update user", http.StatusBadRequest, "error", nil)
+// 		c.JSON(http.StatusBadRequest, response)
+// 		return
+// 	}
+
+// 	response := helper.APIResponse("Success to update user", http.StatusOK, "success", user.FormatUser(updatedUser))
+// 	c.JSON(http.StatusOK, response)
+// }

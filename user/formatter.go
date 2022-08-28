@@ -29,3 +29,29 @@ func FormatUser(user User, token string) UserFormatter {
 
 	return formatter
 }
+
+func FormatUserNonToken(user User) UserFormatter {
+	formatter := UserFormatter{
+		ID:              user.ID,
+		Name:            user.Name,
+		Email:           user.Email,
+		EmailVerifiedAt: user.EmailVerifiedAt,
+		Role:            user.Role,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+		DeletedAt:       user.DeletedAt,
+	}
+
+	return formatter
+}
+
+func FormatUsers(user []User) []UserFormatter {
+	usersFormatter := []UserFormatter{}
+
+	for _, user := range user {
+		userFormatter := FormatUserNonToken(user)
+		usersFormatter = append(usersFormatter, userFormatter)
+	}
+
+	return usersFormatter
+}

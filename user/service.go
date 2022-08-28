@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	// Index() ([]User, error)
+	Index() ([]User, error)
 	RegisterUser(input RegisterUserInput) (User, error)
 	Login(input LoginInput) (User, error)
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
@@ -21,6 +21,16 @@ type service struct {
 
 func NewService(repository Repository) *service {
 	return &service{repository}
+}
+
+func (s *service) Index() ([]User, error) {
+
+	users, err := s.repository.Index()
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
 }
 
 func (s *service) RegisterUser(input RegisterUserInput) (User, error) {
@@ -90,39 +100,3 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 
 	return false, nil
 }
-
-// func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
-// 	var inputID campaign.GetCampaignDetailInput
-
-// 	err := c.ShouldBindUri(&inputID)
-// 	if err != nil {
-// 		response := helper.APIResponse("Failed to update campaign", http.StatusBadRequest, "error", nil)
-// 		c.JSON(http.StatusBadRequest, response)
-// 		return
-// 	}
-
-// 	var inputData campaign.CreateCampaignInput
-
-// 	err = c.ShouldBindJSON(&inputData)
-// 	if err != nil {
-// 		errors := helper.FormatValidationError(err)
-// 		errorMessage := gin.H{"errors": errors}
-
-// 		response := helper.APIResponse("Failed to update campaign", http.StatusUnprocessableEntity, "error", errorMessage)
-// 		c.JSON(http.StatusUnprocessableEntity, response)
-// 		return
-// 	}
-
-// 	currentUser := c.MustGet("currentUser").(user.User)
-// 	inputData.User = currentUser
-
-// 	updatedCampaign, err := h.service.UpdateCampaign(inputID, inputData)
-// 	if err != nil {
-// 		response := helper.APIResponse("Failed to update campaign", http.StatusBadRequest, "error", nil)
-// 		c.JSON(http.StatusBadRequest, response)
-// 		return
-// 	}
-
-// 	response := helper.APIResponse("Success to update campaign", http.StatusOK, "success", campaign.FormatCampaign(updatedCampaign))
-// 	c.JSON(http.StatusOK, response)
-// }
