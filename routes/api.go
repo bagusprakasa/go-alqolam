@@ -30,6 +30,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 
 	api := router.Group("/api/v1")
 	api.POST("/register", userHandler.RegisterUser)
+	api.POST("/check-email", userHandler.CheckEmailAvailability)
 	return router
 }
 
