@@ -4,6 +4,7 @@ import (
 	"go-alqolam/auth"
 	"go-alqolam/handler"
 	"go-alqolam/helper"
+	"go-alqolam/region"
 	"go-alqolam/user"
 	"net/http"
 	"strings"
@@ -17,27 +18,38 @@ import (
 func SetupRoutes(db *gorm.DB) *gin.Engine {
 	// Repository
 	userRepository := user.NewRepository(db)
+	regionRepository := region.NewRepository(db)
 
 	// Service
-	userService := user.NewService(userRepository)
 	authService := auth.NewService()
+	userService := user.NewService(userRepository)
+	regionService := region.NewService(regionRepository)
 
 	// Handler
-	userHandler := handler.NewUserHandler(userService)
 	authHandler := handler.NewAuthHandler(userService, authService)
+	userHandler := handler.NewUserHandler(userService)
+	regionHandler := handler.NewRegionHandler(regionService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	api := router.Group("/api/v1")
-	api.POST("/register", authHandler.RegisterUser)
-	api.POST("/check-email", authHandler.CheckEmailAvailability)
-	api.POST("/login", authHandler.Login)
-	api.GET("/users", authMiddleware(authService, userService), userHandler.Index)
-	api.GET("/user/:id", authMiddleware(authService, userService), userHandler.Show)
-	api.PUT("/user/:id", authMiddleware(authService, userService), userHandler.Update)
-	api.DELETE("/user/:id", authMiddleware(authService, userService), userHandler.Destroy)
-	api.DELETE("/delete/:id", authMiddleware(authService, userService), userHandler.DeleteTask)
+	api := router.Group("/api/v1/")
+	api.POST("register", authHandler.RegisterUser)
+	api.POST("check-email", authHandler.CheckEmailAvailability)
+	api.POST("login", authHandler.Login)
+
+	// User
+	api.GET("users", authMiddleware(authService, userService), userHandler.Index)
+	api.GET("user/:id", authMiddleware(authService, userService), userHandler.Show)
+	api.PUT("user/:id", authMiddleware(authService, userService), userHandler.Update)
+	api.DELETE("user/:id", authMiddleware(authService, userService), userHandler.Destroy)
+
+	// Region
+	api.GET("regions", authMiddleware(authService, userService), regionHandler.Index)
+	api.POST("region", authMiddleware(authService, userService), regionHandler.Store)
+	api.GET("region/:id", authMiddleware(authService, userService), regionHandler.Show)
+	api.PUT("region/:id", authMiddleware(authService, userService), regionHandler.Update)
+	api.DELETE("region/:id", authMiddleware(authService, userService), regionHandler.Destroy)
 	return router
 }
 
