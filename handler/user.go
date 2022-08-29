@@ -58,7 +58,7 @@ func (h *userHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var inputData user.UpdatedUserInput
+	var inputData user.UpdateUserInput
 
 	err = c.ShouldBindJSON(&inputData)
 	if err != nil {

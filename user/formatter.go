@@ -11,7 +11,6 @@ type UserFormatter struct {
 	RememberToken   string    `json:"remember_token"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
-	DeletedAt       time.Time `json:"deleted_at"`
 }
 
 func FormatUser(user User, token string) UserFormatter {
@@ -24,7 +23,6 @@ func FormatUser(user User, token string) UserFormatter {
 		Role:            user.Role,
 		CreatedAt:       user.CreatedAt,
 		UpdatedAt:       user.UpdatedAt,
-		DeletedAt:       user.DeletedAt,
 	}
 
 	return formatter
@@ -39,7 +37,6 @@ func FormatUserNonToken(user User) UserFormatter {
 		Role:            user.Role,
 		CreatedAt:       user.CreatedAt,
 		UpdatedAt:       user.UpdatedAt,
-		DeletedAt:       user.DeletedAt,
 	}
 
 	return formatter

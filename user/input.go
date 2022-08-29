@@ -29,8 +29,3 @@ type CheckEmailInput struct {
 type GetDetailInput struct {
 	ID int `uri:"id" binding:"required"`
 }
-
-type UpdatedUserInput struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
-}

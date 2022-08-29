@@ -13,7 +13,7 @@ type Service interface {
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 	Show(ID int) (User, error)
 	FindUser(ID int) (User, error)
-	Update(inputID GetDetailInput, inputData UpdatedUserInput) (User, error)
+	Update(inputID GetDetailInput, inputData UpdateUserInput) (User, error)
 	Destroy(inputID GetDetailInput) (User, error)
 }
 
@@ -116,7 +116,7 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	return false, nil
 }
 
-func (s *service) Update(inputID GetDetailInput, inputData UpdatedUserInput) (User, error) {
+func (s *service) Update(inputID GetDetailInput, inputData UpdateUserInput) (User, error) {
 	user, err := s.repository.Show(inputID.ID)
 	if err != nil {
 		return user, err
