@@ -4,6 +4,7 @@ import (
 	"go-alqolam/auth"
 	"go-alqolam/handler"
 	"go-alqolam/helper"
+	"go-alqolam/member"
 	"go-alqolam/region"
 	"go-alqolam/user"
 	"net/http"
@@ -19,16 +20,19 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	// Repository
 	userRepository := user.NewRepository(db)
 	regionRepository := region.NewRepository(db)
+	memberRepository := member.NewRepository(db)
 
 	// Service
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
 	regionService := region.NewService(regionRepository)
+	memberService := member.NewService(memberRepository)
 
 	// Handler
 	authHandler := handler.NewAuthHandler(userService, authService)
 	userHandler := handler.NewUserHandler(userService)
 	regionHandler := handler.NewRegionHandler(regionService)
+	memberHandler := handler.NewMemberHandler(memberService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -50,6 +54,14 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	api.GET("region/:id", authMiddleware(authService, userService), regionHandler.Show)
 	api.PUT("region/:id", authMiddleware(authService, userService), regionHandler.Update)
 	api.DELETE("region/:id", authMiddleware(authService, userService), regionHandler.Destroy)
+
+	// Member
+	api.GET("members", authMiddleware(authService, userService), memberHandler.Index)
+	api.POST("member", authMiddleware(authService, userService), memberHandler.Store)
+	api.GET("member/:id", authMiddleware(authService, userService), memberHandler.Show)
+	api.PUT("member/:id", authMiddleware(authService, userService), memberHandler.Update)
+	api.DELETE("member/:id", authMiddleware(authService, userService), memberHandler.Destroy)
+
 	return router
 }
 
