@@ -23,16 +23,21 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	authService := auth.NewService()
 
 	// Handler
-	userHandler := handler.NewUserHandler(userService, authService)
+	userHandler := handler.NewUserHandler(userService)
+	authHandler := handler.NewAuthHandler(userService, authService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
 
 	api := router.Group("/api/v1")
-	api.POST("/register", userHandler.RegisterUser)
-	api.POST("/check-email", userHandler.CheckEmailAvailability)
-	api.POST("/login", userHandler.Login)
+	api.POST("/register", authHandler.RegisterUser)
+	api.POST("/check-email", authHandler.CheckEmailAvailability)
+	api.POST("/login", authHandler.Login)
 	api.GET("/users", authMiddleware(authService, userService), userHandler.Index)
+	api.GET("/user/:id", authMiddleware(authService, userService), userHandler.Show)
+	api.PUT("/user/:id", authMiddleware(authService, userService), userHandler.Update)
+	api.DELETE("/user/:id", authMiddleware(authService, userService), userHandler.Destroy)
+	api.DELETE("/delete/:id", authMiddleware(authService, userService), userHandler.DeleteTask)
 	return router
 }
 
@@ -69,7 +74,7 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 
 		userID := int(claim["user_id"].(float64))
 
-		user, err := userService.Show(userID)
+		user, err := userService.FindUser(userID)
 		if err != nil {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)

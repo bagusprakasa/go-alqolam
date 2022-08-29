@@ -12,7 +12,9 @@ type Service interface {
 	Login(input LoginInput) (User, error)
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 	Show(ID int) (User, error)
-	// Update(input UpdateUserInput) (User, error)
+	FindUser(ID int) (User, error)
+	Update(inputID GetDetailInput, inputData UpdatedUserInput) (User, error)
+	Destroy(inputID GetDetailInput) (User, error)
 }
 
 type service struct {
@@ -87,6 +89,19 @@ func (s *service) Show(ID int) (User, error) {
 	return user, nil
 }
 
+func (s *service) FindUser(ID int) (User, error) {
+	user, err := s.repository.Show(ID)
+	if err != nil {
+		return user, err
+	}
+
+	if user.ID == 0 {
+		return user, errors.New("No user found on with that ID")
+	}
+
+	return user, nil
+}
+
 func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	email := input.Email
 	user, err := s.repository.FindByEmail(email)
@@ -99,4 +114,34 @@ func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (s *service) Update(inputID GetDetailInput, inputData UpdatedUserInput) (User, error) {
+	user, err := s.repository.Show(inputID.ID)
+	if err != nil {
+		return user, err
+	}
+
+	user.Name = inputData.Name
+	user.Email = inputData.Email
+
+	updatedUser, err := s.repository.Update(user)
+	if err != nil {
+		return updatedUser, err
+	}
+
+	return updatedUser, nil
+}
+
+func (s *service) Destroy(inputID GetDetailInput) (User, error) {
+	user, err := s.repository.Show(inputID.ID)
+	if err != nil {
+		return user, err
+	}
+	deletedUser, err := s.repository.Destroy(user)
+	if err != nil {
+		return deletedUser, err
+	}
+
+	return deletedUser, nil
 }
