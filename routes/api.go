@@ -7,6 +7,7 @@ import (
 	"go-alqolam/member"
 	"go-alqolam/region"
 	"go-alqolam/user"
+	"go-alqolam/wallet"
 	"net/http"
 	"strings"
 
@@ -21,18 +22,21 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	userRepository := user.NewRepository(db)
 	regionRepository := region.NewRepository(db)
 	memberRepository := member.NewRepository(db)
+	walletRepository := wallet.NewRepository(db)
 
 	// Service
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
 	regionService := region.NewService(regionRepository)
 	memberService := member.NewService(memberRepository)
+	walletService := wallet.NewService(walletRepository)
 
 	// Handler
 	authHandler := handler.NewAuthHandler(userService, authService)
 	userHandler := handler.NewUserHandler(userService)
 	regionHandler := handler.NewRegionHandler(regionService)
 	memberHandler := handler.NewMemberHandler(memberService)
+	walletHandler := handler.NewWalletHandler(walletService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -61,6 +65,13 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	api.GET("member/:id", authMiddleware(authService, userService), memberHandler.Show)
 	api.PUT("member/:id", authMiddleware(authService, userService), memberHandler.Update)
 	api.DELETE("member/:id", authMiddleware(authService, userService), memberHandler.Destroy)
+
+	// Member
+	api.GET("wallets", authMiddleware(authService, userService), walletHandler.Index)
+	api.POST("wallet", authMiddleware(authService, userService), walletHandler.Store)
+	api.GET("wallet/:id", authMiddleware(authService, userService), walletHandler.Show)
+	api.PUT("wallet/:id", authMiddleware(authService, userService), walletHandler.Update)
+	api.DELETE("wallet/:id", authMiddleware(authService, userService), walletHandler.Destroy)
 
 	return router
 }
