@@ -4,10 +4,10 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	Index() ([]Wallet, error)
-	Store(awllet Wallet) (Wallet, error)
+	Store(wallet Wallet) (Wallet, error)
 	Show(ID int) (Wallet, error)
-	Update(awllet Wallet) (Wallet, error)
-	Destroy(awllet Wallet) (Wallet, error)
+	Update(wallet Wallet) (Wallet, error)
+	Destroy(wallet Wallet) (Wallet, error)
 }
 
 type repository struct {

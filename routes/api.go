@@ -6,6 +6,7 @@ import (
 	"go-alqolam/helper"
 	"go-alqolam/member"
 	"go-alqolam/region"
+	transferWallet "go-alqolam/transfer_wallet"
 	"go-alqolam/user"
 	"go-alqolam/wallet"
 	"net/http"
@@ -23,6 +24,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	regionRepository := region.NewRepository(db)
 	memberRepository := member.NewRepository(db)
 	walletRepository := wallet.NewRepository(db)
+	transferWalletRepository := transferWallet.NewRepository(db)
 
 	// Service
 	authService := auth.NewService()
@@ -30,6 +32,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	regionService := region.NewService(regionRepository)
 	memberService := member.NewService(memberRepository)
 	walletService := wallet.NewService(walletRepository)
+	transferWalletService := transferWallet.NewService(transferWalletRepository)
 
 	// Handler
 	authHandler := handler.NewAuthHandler(userService, authService)
@@ -37,6 +40,7 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	regionHandler := handler.NewRegionHandler(regionService)
 	memberHandler := handler.NewMemberHandler(memberService)
 	walletHandler := handler.NewWalletHandler(walletService)
+	transferWalletHandler := handler.NewTransferWalletHandler(transferWalletService)
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -66,12 +70,19 @@ func SetupRoutes(db *gorm.DB) *gin.Engine {
 	api.PUT("member/:id", authMiddleware(authService, userService), memberHandler.Update)
 	api.DELETE("member/:id", authMiddleware(authService, userService), memberHandler.Destroy)
 
-	// Member
+	// Wallet
 	api.GET("wallets", authMiddleware(authService, userService), walletHandler.Index)
 	api.POST("wallet", authMiddleware(authService, userService), walletHandler.Store)
 	api.GET("wallet/:id", authMiddleware(authService, userService), walletHandler.Show)
 	api.PUT("wallet/:id", authMiddleware(authService, userService), walletHandler.Update)
 	api.DELETE("wallet/:id", authMiddleware(authService, userService), walletHandler.Destroy)
+
+	// Transfer Wallets
+	api.GET("transfer-wallets", authMiddleware(authService, userService), transferWalletHandler.Index)
+	api.POST("transfer-wallet", authMiddleware(authService, userService), transferWalletHandler.Store)
+	api.GET("transfer-wallet/:id", authMiddleware(authService, userService), transferWalletHandler.Show)
+	api.PUT("transfer-wallet/:id", authMiddleware(authService, userService), transferWalletHandler.Update)
+	api.DELETE("transfer-wallet/:id", authMiddleware(authService, userService), transferWalletHandler.Destroy)
 
 	return router
 }
