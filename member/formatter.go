@@ -3,9 +3,9 @@ package member
 import "time"
 
 type MemberFormatter struct {
-	ID       int `json:"id"`
-	RegionID int `json:"region_id"`
-	// Region    RegionFormatter `json:"region"`
+	ID        int       `json:"id"`
+	RegionID  int       `json:"region_id"`
+	Region    string    `json:"region"`
 	Name      string    `json:"name"`
 	Phone     string    `json:"phone"`
 	Address   string    `json:"address"`
@@ -14,13 +14,8 @@ type MemberFormatter struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type RegionFormatter struct {
-	Name string `json:"name"`
-}
-
 func FormatMember(member Member) MemberFormatter {
-	// member = region.Member
-	// regionFormatter := RegionFormatter{}
+	memberRegion := member.Region
 	formatter := MemberFormatter{
 		ID:        member.ID,
 		RegionID:  member.RegionID,
@@ -30,9 +25,8 @@ func FormatMember(member Member) MemberFormatter {
 		Gender:    member.Gender,
 		CreatedAt: member.CreatedAt,
 		UpdatedAt: member.UpdatedAt,
-		// region:    region.Name,
+		Region:    memberRegion.Name,
 	}
-
 	return formatter
 }
 

@@ -21,7 +21,7 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) Index() ([]Member, error) {
 	var member []Member
 
-	err := r.db.Find(&member).Error
+	err := r.db.Joins("Region").Find(&member).Error
 	if err != nil {
 		return member, err
 	}
@@ -39,7 +39,7 @@ func (r *repository) Store(member Member) (Member, error) {
 
 func (r *repository) Show(ID int) (Member, error) {
 	var member Member
-	err := r.db.Where("id = ? ", ID).Find(&member).Error
+	err := r.db.Preload("Region").Where("id = ? ", ID).Find(&member).Error
 	if err != nil {
 		return member, err
 	}
