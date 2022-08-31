@@ -21,7 +21,7 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) Index() ([]TransferWallet, error) {
 	var transferWallet []TransferWallet
 
-	err := r.db.Find(&transferWallet).Error
+	err := r.db.Preload("FromWallet").Preload("ToWallet").Find(&transferWallet).Error
 	if err != nil {
 		return transferWallet, err
 	}
@@ -39,7 +39,7 @@ func (r *repository) Store(transferWallet TransferWallet) (TransferWallet, error
 
 func (r *repository) Show(ID int) (TransferWallet, error) {
 	var transferWallet TransferWallet
-	err := r.db.Where("id = ? ", ID).Find(&transferWallet).Error
+	err := r.db.Preload("FromWallet").Preload("ToWallet").Where("id = ? ", ID).Find(&transferWallet).Error
 	if err != nil {
 		return transferWallet, err
 	}
